@@ -6,7 +6,7 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class JsonConsumer {
-    // @KafkaListener(topics = "quotes-json", groupId = "${spring.kafka.consumer.group-id}")
+    @KafkaListener(topics = "${json.topic}", groupId = "spring-boot-kafka")
     public void consume(ConsumerRecord<Integer, Quote> record) {
         System.out.println("received json = " + record.value() + " with key " + record.key());
       }

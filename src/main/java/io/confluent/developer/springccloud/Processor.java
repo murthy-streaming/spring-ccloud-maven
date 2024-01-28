@@ -22,15 +22,14 @@ import org.springframework.stereotype.Component;
 @Component
 public class Processor {
 
-    @Bean
-    NewTopic quotesWordCount() {
-        return TopicBuilder.name("quotes-wordcount-output").partitions(6).replicas(3).build();
-    }
+    @Value("${input.topic}")
+    private String inputTopic;
 
-    @Bean
-    NewTopic quotesUpperCase() {
-        return TopicBuilder.name("quotes-upper-case").partitions(6).replicas(3).build();
-    }
+    @Value("${topic.uppercase}")
+    private String topicUppercase;
+
+    @Value("${topic.wordcount}")
+    private String topicWordCount;
     
     @Autowired
     public void process(StreamsBuilder builder) {
@@ -46,10 +45,10 @@ public class Processor {
         // be stored
         // in the message keys).
         KStream<Integer, String> textLines = builder
-                .stream("quotes", Consumed.with(integerSerde, stringSerde));
+                .stream(inputTopic, Consumed.with(integerSerde, stringSerde));
 
         KStream<Integer, String> upperCased = textLines.mapValues((ValueMapper<String, String>) String::toUpperCase);
-        upperCased.to("quotes-upper-case", Produced.with(integerSerde, stringSerde));
+        upperCased.to(topicUppercase, Produced.with(integerSerde, stringSerde));
 
         KTable<String, Long> wordCounts = textLines
                 // Split each text line, by whitespace, into words. The text lines are the
@@ -65,7 +64,7 @@ public class Processor {
 
         // Convert the `KTable<String, Long>` into a `KStream<String, Long>` and write
         // to the output topic.
-        wordCounts.toStream().to("quotes-wordcount-output", Produced.with(stringSerde, longSerde));
+        wordCounts.toStream().to(topicWordCount, Produced.with(stringSerde, longSerde));
 
     }
 }

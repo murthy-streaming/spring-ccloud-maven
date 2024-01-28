@@ -33,5 +33,5 @@ build/
 .vscode/
 
 ### Project Specific ###
-# /src/main/resources/application.properties
 .mvn/
+src/main/resources/application.properties

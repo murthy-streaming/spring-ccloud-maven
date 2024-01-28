@@ -20,17 +20,16 @@ import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
 @Component
-// @EnableTransactionManagement
+@EnableTransactionManagement
 public class Producer {
 
     private final KafkaTemplate<Integer, String> template;
 
     Faker faker;
 
-    @Bean
-    NewTopic quotes() {
-        return TopicBuilder.name("quotes").partitions(6).replicas(3).build();
-    }
+    @Value("${input.topic}")
+    private String inputTopic;
+
 
     @EventListener(ApplicationStartedEvent.class)
     // @Transactional
@@ -42,7 +41,7 @@ public class Producer {
         for (int i = 0; i < 5; i++) {
             quote = faker.hobbit().quote();
             System.out.printf("Sending quote %d: %s %n", i, quote);
-            template.send("quotes", faker.random().nextInt(42), quote);
+            template.send(inputTopic, faker.random().nextInt(42), quote);
         }
 
     }
